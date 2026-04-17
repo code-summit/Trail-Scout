@@ -1,0 +1,96 @@
+.trail-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.trail-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trail-image {
+  width: 100%;
+  height: 200px;
+  background-color: #eee;
+  overflow: hidden;
+}
+
+.trail-content {
+  padding: 20px;
+}
+
+.trail-name {
+  font-size: 1.3rem;
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.trail-location {
+  color: #666;
+  margin: 0 0 15px 0;
+  font-size: 0.95rem;
+}
+
+.trail-details {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.difficulty {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.difficulty[data-level="easy"] {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.difficulty[data-level="medium"] {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.difficulty[data-level="hard"] {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.distance {
+  padding: 5px 10px;
+  background-color: #e7f3ff;
+  color: #004085;
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
+.trail-rating {
+  margin-bottom: 15px;
+}
+
+.stars {
+  font-size: 0.95rem;
+  color: #ff9800;
+}
+
+.view-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-btn:hover {
+  background-color: #764ba2;
+}

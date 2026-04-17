@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: trail-scout-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: trail-scout-backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/trail-scout?authSource=admin
+      JWT_SECRET: your-secret-key-here
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: trail-scout-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:5000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mongo-data:
+
+networks:
+  default:
+    name: trail-scout-network
