@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: trail-scout-api
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VOCAL_BRIDGE_API_URL
+        value: https://api.vocalbridgeai.com
