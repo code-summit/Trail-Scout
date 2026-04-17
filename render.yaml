@@ -3,7 +3,7 @@ services:
     name: trail-scout-api
     env: node
     plan: free
-    buildCommand: npm install --prefix backend
+    buildCommand: bash build.sh
     startCommand: node backend/server.js
     envVars:
       - key: NODE_ENV
