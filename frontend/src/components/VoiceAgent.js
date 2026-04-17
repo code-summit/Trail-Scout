@@ -56,7 +56,7 @@ function VoiceAgent() {
         throw new Error('Failed to get voice token');
       }
 
-      const tokenData = await response.json();
+      await response.json(); // Consume response
       console.log('✅ Voice token received');
 
       // Request microphone access
