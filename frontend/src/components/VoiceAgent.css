@@ -399,6 +399,38 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Demo Input */
+.demo-input-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.demo-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.demo-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .voice-interface {
