@@ -9,7 +9,6 @@ const router = express.Router();
 router.post('/token', async (req, res) => {
   try {
     const apiKey = process.env.VOCAL_BRIDGE_API_KEY;
-    const agentId = '2c2ecc6d-ed81-4967-83e3-7f35e8327bc7'; // Trail Scout Agent ID
     const apiUrl = 'http://vocalbridgeai.com/api/v1';
     const tokenUrl = `${apiUrl}/token`;
 
@@ -26,12 +25,12 @@ router.post('/token', async (req, res) => {
     const participantName = req.body?.participantName || req.user?.name || 'Guest User';
 
     // Call Vocal Bridge API to get token
+    // Note: agent-scoped API keys don't need X-Agent-Id header
     console.log('📞 Calling Vocal Bridge:', tokenUrl);
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'X-API-Key': apiKey,
-        'X-Agent-Id': agentId,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -39,12 +38,15 @@ router.post('/token', async (req, res) => {
       })
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.text();
-      console.error('Vocal Bridge API error:', error);
+      console.error('Vocal Bridge API error (status:', response.status, '):', error);
       return res.status(response.status).json({
         error: 'Failed to generate voice token',
-        message: error
+        message: error,
+        status: response.status
       });
     }
 
