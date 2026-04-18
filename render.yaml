@@ -9,4 +9,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: VOCAL_BRIDGE_API_URL
-        value: https://api.vocalbridgeai.com
+        value: http://vocalbridgeai.com/api/v1
