@@ -42,7 +42,8 @@ function VoiceAgent() {
 
     try {
       // Get voice token from backend
-      const response = await fetch('/api/voice/token', {
+      const backendUrl = process.env.REACT_APP_API_URL || 'https://trail-scout-px9h.onrender.com';
+      const response = await fetch(`${backendUrl}/api/voice/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

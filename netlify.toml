@@ -20,6 +20,7 @@
 [build.environment]
   NODE_VERSION = "18"
   CI = "true"
+  REACT_APP_API_URL = "https://trail-scout-px9h.onrender.com"
 
 # Redirects for SPA
 [[redirects]]
