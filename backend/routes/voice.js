@@ -9,7 +9,8 @@ const router = express.Router();
 router.post('/token', async (req, res) => {
   try {
     const apiKey = process.env.VOCAL_BRIDGE_API_KEY;
-    const apiUrl = 'http://vocalbridgeai.com/api/v1'; // Correct endpoint
+    const agentId = '2c2ecc6d-ed81-4967-83e3-7f35e8327bc7'; // Trail Scout Agent ID
+    const apiUrl = 'http://vocalbridgeai.com/api/v1';
     const tokenUrl = `${apiUrl}/token`;
 
     console.log('🔍 Voice token request:', { apiUrl, tokenUrl, hasApiKey: !!apiKey });
@@ -30,6 +31,7 @@ router.post('/token', async (req, res) => {
       method: 'POST',
       headers: {
         'X-API-Key': apiKey,
+        'X-Agent-Id': agentId,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
