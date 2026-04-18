@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { VocalBridge } from '@vocalbridgeai/sdk';
 import './VoiceAgent.css';
 
 function VoiceAgent() {
@@ -12,30 +13,7 @@ function VoiceAgent() {
 
   // Initialize Voice Agent with Vocal Bridge SDK
   useEffect(() => {
-    const initializeVoiceAgent = async () => {
-      try {
-        // Load Vocal Bridge SDK from CDN
-        if (window.VocalBridge) {
-          console.log('✅ Vocal Bridge SDK already loaded');
-          return;
-        }
-
-        const script = document.createElement('script');
-        script.src = 'https://cdn.vocalbridgeai.com/sdk/vocal-bridge.js';
-        script.async = true;
-        script.onload = () => {
-          console.log('✅ Vocal Bridge SDK loaded');
-        };
-        script.onerror = () => {
-          console.warn('⚠️ Vocal Bridge SDK failed to load from CDN');
-        };
-        document.head.appendChild(script);
-      } catch (err) {
-        console.error('SDK loading error:', err);
-      }
-    };
-
-    initializeVoiceAgent();
+    console.log('✅ Vocal Bridge SDK loaded via npm');
   }, []);
 
   // Connect to voice agent using Vocal Bridge SDK
@@ -47,13 +25,8 @@ function VoiceAgent() {
     try {
       const backendUrl = process.env.REACT_APP_API_URL || 'https://trail-scout-px9h.onrender.com';
 
-      // Check if Vocal Bridge SDK is available
-      if (!window.VocalBridge) {
-        throw new Error('Vocal Bridge SDK not available. Please wait for it to load.');
-      }
-
       // Initialize Vocal Bridge with token URL from backend
-      const vb = new window.VocalBridge({
+      const vb = new VocalBridge({
         auth: {
           tokenUrl: `${backendUrl}/api/voice/token`
         },
