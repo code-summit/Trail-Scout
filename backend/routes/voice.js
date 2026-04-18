@@ -9,9 +9,10 @@ const router = express.Router();
 router.post('/token', async (req, res) => {
   try {
     const apiKey = process.env.VOCAL_BRIDGE_API_KEY;
-    const apiUrl = 'https://vocalbridgeai.com/api/v1/token'; // CORRECT: HTTPS endpoint
+    const agentId = '2c2ecc6d-ed81-4967-83e3-7f35e8327bc7'; // Trail Scout Agent ID
+    const apiUrl = 'https://vocalbridgeai.com/api/v1/token';
 
-    console.log('🔍 Voice token request:', { apiUrl, hasApiKey: !!apiKey });
+    console.log('🔍 Voice token request:', { apiUrl, hasApiKey: !!apiKey, agentId });
 
     if (!apiKey) {
       return res.status(500).json({
@@ -23,12 +24,13 @@ router.post('/token', async (req, res) => {
     // Get the participant name from request or use default
     const participantName = req.body?.participantName || req.user?.name || 'Guest User';
 
-    // Call Vocal Bridge API - agent-scoped keys don't need X-Agent-Id
+    // Call Vocal Bridge API - account-scoped keys require X-Agent-Id header
     console.log('📞 Calling Vocal Bridge:', apiUrl);
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'X-API-Key': apiKey,
+        'X-Agent-Id': agentId,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
