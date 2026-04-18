@@ -9,7 +9,10 @@ const router = express.Router();
 router.post('/token', async (req, res) => {
   try {
     const apiKey = process.env.VOCAL_BRIDGE_API_KEY;
-    const apiUrl = process.env.VOCAL_BRIDGE_API_URL || 'http://vocalbridgeai.com/api/v1';
+    const apiUrl = 'http://vocalbridgeai.com/api/v1'; // Correct endpoint
+    const tokenUrl = `${apiUrl}/token`;
+
+    console.log('🔍 Voice token request:', { apiUrl, tokenUrl, hasApiKey: !!apiKey });
 
     if (!apiKey) {
       return res.status(500).json({
@@ -22,7 +25,8 @@ router.post('/token', async (req, res) => {
     const participantName = req.body?.participantName || req.user?.name || 'Guest User';
 
     // Call Vocal Bridge API to get token
-    const response = await fetch(`${apiUrl}/token`, {
+    console.log('📞 Calling Vocal Bridge:', tokenUrl);
+    const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'X-API-Key': apiKey,
@@ -43,6 +47,7 @@ router.post('/token', async (req, res) => {
     }
 
     const tokenData = await response.json();
+    console.log('✅ Voice token generated successfully');
 
     res.json({
       success: true,
@@ -53,7 +58,7 @@ router.post('/token', async (req, res) => {
       expires_in: tokenData.expires_in
     });
   } catch (error) {
-    console.error('Voice token error:', error);
+    console.error('❌ Voice token error:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: error.message
