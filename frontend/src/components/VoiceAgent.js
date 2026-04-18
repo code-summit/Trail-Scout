@@ -8,14 +8,18 @@ function VoiceAgent() {
   const [transcript, setTranscript] = useState([]);
   const [error, setError] = useState(null);
   const [agentStatus, setAgentStatus] = useState('idle');
-  const mediaStreamRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
+  const vbRef = useRef(null);
 
-  // Initialize Voice Agent
+  // Initialize Voice Agent with Vocal Bridge SDK
   useEffect(() => {
     const initializeVoiceAgent = async () => {
       try {
-        // Load Vocal Bridge SDK dynamically from CDN
+        // Load Vocal Bridge SDK from CDN
+        if (window.VocalBridge) {
+          console.log('✅ Vocal Bridge SDK already loaded');
+          return;
+        }
+
         const script = document.createElement('script');
         script.src = 'https://cdn.vocalbridgeai.com/sdk/vocal-bridge.js';
         script.async = true;
@@ -23,128 +27,113 @@ function VoiceAgent() {
           console.log('✅ Vocal Bridge SDK loaded');
         };
         script.onerror = () => {
-          console.log('Note: Voice SDK not available - but app is functional');
+          console.warn('⚠️ Vocal Bridge SDK failed to load from CDN');
         };
         document.head.appendChild(script);
       } catch (err) {
-        console.error('SDK loading info:', err);
+        console.error('SDK loading error:', err);
       }
     };
 
     initializeVoiceAgent();
   }, []);
 
-  // Connect to voice agent
+  // Connect to voice agent using Vocal Bridge SDK
   const handleConnect = async () => {
     setIsConnecting(true);
     setError(null);
     setTranscript([]);
 
     try {
-      // Get voice token from backend
       const backendUrl = process.env.REACT_APP_API_URL || 'https://trail-scout-px9h.onrender.com';
-      const response = await fetch(`${backendUrl}/api/voice/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          participantName: 'Trail Scout User'
-        })
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to get voice token');
+      // Check if Vocal Bridge SDK is available
+      if (!window.VocalBridge) {
+        throw new Error('Vocal Bridge SDK not available. Please wait for it to load.');
       }
 
-      await response.json(); // Consume response
-      console.log('✅ Voice token received');
+      // Initialize Vocal Bridge with token URL from backend
+      const vb = new window.VocalBridge({
+        auth: {
+          tokenUrl: `${backendUrl}/api/voice/token`
+        },
+        participantName: 'Trail Scout User',
+        debug: true
+      });
 
-      // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
+      vbRef.current = vb;
+
+      // Handle connection state changes
+      vb.on('connectionStateChanged', (state) => {
+        console.log('Connection state:', state);
+        if (state === 'connected') {
+          setIsConnected(true);
+          setAgentStatus('listening');
+        } else if (state === 'disconnected') {
+          setIsConnected(false);
+          setAgentStatus('idle');
+        } else {
+          setAgentStatus('connecting');
         }
       });
 
-      mediaStreamRef.current = stream;
+      // Handle live transcript
+      vb.on('transcript', ({ role, text, timestamp }) => {
+        console.log(`[${role}] ${text}`);
+        setTranscript(prev => [...prev, { role, text, timestamp }]);
+      });
 
-      // Start recording for demo
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
+      // Handle errors
+      vb.on('error', (err) => {
+        console.error('Vocal Bridge error:', err);
+        setError(`Connection error: ${err.message || err.code}`);
+        setIsConnecting(false);
+      });
 
-      // Simulate receiving agent response
-      setTranscript([
-        { role: 'assistant', text: "Hey, Trail Scout here! Planning a hike or adventure? Ask me about trails, conditions, gear, or anything outdoors -- I've got you covered.", timestamp: Date.now() }
-      ]);
-
-      setIsConnected(true);
-      setIsMuted(false);
-      setAgentStatus('listening');
+      // Connect to the agent
+      console.log('📞 Connecting to Trail Scout...');
+      await vb.connect();
+      
       setIsConnecting(false);
-
-      // Auto-disconnect after demo (30 seconds)
-      setTimeout(() => {
-        if (isConnected) {
-          handleDisconnect();
-        }
-      }, 30000);
-
+      setIsMuted(false);
     } catch (err) {
+      console.error('❌ Connection failed:', err);
       setError(`Failed to connect: ${err.message}`);
       setIsConnecting(false);
-      console.error('Connection error:', err);
     }
   };
 
-  // Disconnect from voice agent
+  // Disconnect from agent
   const handleDisconnect = async () => {
     try {
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
+      if (vbRef.current) {
+        await vbRef.current.disconnect();
+        vbRef.current = null;
       }
       setIsConnected(false);
-      setAgentStatus('idle');
+      setTranscript([]);
+      setError(null);
     } catch (err) {
-      setError(`Failed to disconnect: ${err.message}`);
+      console.error('Disconnect error:', err);
     }
   };
 
   // Toggle microphone
   const handleToggleMicrophone = async () => {
     try {
-      if (mediaStreamRef.current) {
-        const audioTracks = mediaStreamRef.current.getAudioTracks();
-        audioTracks.forEach(track => {
-          track.enabled = !track.enabled;
-        });
+      if (vbRef.current) {
+        await vbRef.current.toggleMicrophone();
         setIsMuted(!isMuted);
-        setAgentStatus(isMuted ? 'listening' : 'muted');
       }
     } catch (err) {
-      setError(`Failed to toggle microphone: ${err.message}`);
+      console.error('Microphone toggle error:', err);
+      setError(`Microphone error: ${err.message}`);
     }
   };
 
   // Clear transcript
   const handleClearTranscript = () => {
     setTranscript([]);
-  };
-
-  // Add demo message on typing
-  const handleDemoInput = (message) => {
-    if (message.trim()) {
-      setTranscript(prev => [
-        ...prev,
-        { role: 'user', text: message, timestamp: Date.now() },
-        { role: 'assistant', text: 'Great question! I found some amazing trails for you. Would you like to know more?', timestamp: Date.now() + 1000 }
-      ]);
-    }
   };
 
   return (
@@ -227,7 +216,14 @@ function VoiceAgent() {
               placeholder="Type what you'd say (demo mode)..."
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  handleDemoInput(e.target.value);
+                  // Just for testing - in production use voice
+                  const message = e.target.value;
+                  if (message.trim()) {
+                    setTranscript(prev => [
+                      ...prev,
+                      { role: 'user', text: message, timestamp: Date.now() }
+                    ]);
+                  }
                   e.target.value = '';
                 }
               }}
